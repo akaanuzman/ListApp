@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F19DE5DD28E205B20056CBC6 /* StringConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19DE5DC28E205B20056CBC6 /* StringConstants.swift */; };
 		F1B1673B28E1252D00968D93 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B1673A28E1252D00968D93 /* AppDelegate.swift */; };
 		F1B1673D28E1252D00968D93 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B1673C28E1252D00968D93 /* SceneDelegate.swift */; };
 		F1B1673F28E1252D00968D93 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B1673E28E1252D00968D93 /* ViewController.swift */; };
@@ -18,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F19DE5DC28E205B20056CBC6 /* StringConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringConstants.swift; sourceTree = "<group>"; };
 		F1B1673728E1252D00968D93 /* ListApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ListApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1B1673A28E1252D00968D93 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F1B1673C28E1252D00968D93 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -41,6 +43,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F19DE5DB28E205A30056CBC6 /* Constants */ = {
+			isa = PBXGroup;
+			children = (
+				F19DE5DC28E205B20056CBC6 /* StringConstants.swift */,
+			);
+			path = Constants;
+			sourceTree = "<group>";
+		};
 		F1B1672E28E1252D00968D93 = {
 			isa = PBXGroup;
 			children = (
@@ -60,6 +70,7 @@
 		F1B1673928E1252D00968D93 /* ListApp */ = {
 			isa = PBXGroup;
 			children = (
+				F19DE5DB28E205A30056CBC6 /* Constants */,
 				F1B1675428E128BA00968D93 /* Models */,
 				F1B1675328E1257100968D93 /* Views */,
 				F1B1675228E1256B00968D93 /* Controllers */,
@@ -178,6 +189,7 @@
 			files = (
 				F1B1673F28E1252D00968D93 /* ViewController.swift in Sources */,
 				F1B1675628E128D600968D93 /* CarModel.swift in Sources */,
+				F19DE5DD28E205B20056CBC6 /* StringConstants.swift in Sources */,
 				F1B1674528E1252D00968D93 /* ListApp.xcdatamodeld in Sources */,
 				F1B1673B28E1252D00968D93 /* AppDelegate.swift in Sources */,
 				F1B1673D28E1252D00968D93 /* SceneDelegate.swift in Sources */,

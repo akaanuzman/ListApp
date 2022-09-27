@@ -1,9 +1,10 @@
-
 import UIKit
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
-    var cars = CarModel.cars
+    private var cars = CarModel.cars
+    private let stringConstants = StringContants.instance
+    private var alertController = UIAlertController()
     @IBOutlet weak var tableView: UITableView!
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,57 +24,99 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
 
     @IBAction func addCar(_ sender: Any) {
+        presentAddAlert()
+    }
 
-        let alertController = UIAlertController(title: "Add Car",
+    func presentAddAlert() {
+        presentAlert(title: stringConstants.addCarAlertTitle,
             message: nil,
-            preferredStyle: .alert)
-        let addButton = UIAlertAction(title: "Add", style: .default) {
-            _ in
-            let nameText = alertController.textFields?.first?.text!
-            let modelText = alertController.textFields?[1].text!
-            let priceText = alertController.textFields?.last?.text!
-            if nameText != "" && modelText != "" && priceText != "" {
-                self.cars.append(CarModel(name: nameText!,
-                    model: modelText!, price: Double(priceText!)!))
-                self.tableView.reloadData()
-            } else {
-                let alertController = UIAlertController(title: "Error Message",
-                    message: "You must enter all parameters. \n Please, try again!",
-                    preferredStyle: .alert)
-                let addButton = UIAlertAction(title: "OK", style: .default)
-                alertController.addAction(addButton)
-                self.present(alertController, animated: true)
+            cancelButtonTitle: stringConstants.cancelButton,
+            defaultButtonTitle: stringConstants.addButton,
+            defaultButtonHandler: {
+                _ in
+                let nameText = self.alertController.textFields?.first?.text!
+                let modelText = self.alertController.textFields?[1].text!
+                let priceText = self.alertController.textFields?.last?.text!
+                if nameText != "" && modelText != "" && priceText != "" {
+                    self.cars.append(CarModel(name: nameText!,
+                        model: modelText!, price: Double(priceText!) ?? Double(0)))
+                    self.tableView.reloadData()
+                } else {
+                    self.presentErrorAlert()
+                }
+            },
+            isUseTextField: true,
+            textFieldLenght: stringConstants.fieldsPlaceHolder.count,
+            textFieldsPlaceholder: stringConstants.fieldsPlaceHolder
+        )
+    }
+
+    /// [Alert is created by this method optionally.]
+    func presentAlert(
+        title: String?,
+        message: String?,
+        alertStyle: UIAlertController.Style = .alert,
+        cancelButtonTitle: String?,
+        defaultButtonTitle: String? = nil,
+        defaultButtonHandler: ((UIAlertAction) -> Void)? = nil,
+        isUseTextField: Bool = false,
+        textFieldLenght: Int = 1,
+        textFieldsPlaceholder: [String]? = nil,
+        textFieldKeyBoardType: UIKeyboardType? = nil
+    ) {
+        /// [Alert is created.]
+        alertController = UIAlertController(title: title,
+            message: message,
+            preferredStyle: alertStyle)
+
+        /// [Cancel button action is created in alertController.]
+        let cancelButton = UIAlertAction(title: cancelButtonTitle,
+            style: .destructive)
+        alertController.addAction(cancelButton)
+
+        /// [Default button action is created by optional in alertController.]
+        if let defaultButtonTitle {
+            let defaultButton = UIAlertAction(title: defaultButtonTitle,
+                style: .default,
+                handler: defaultButtonHandler)
+            alertController.addAction(defaultButton)
+        }
+
+        /// [If you wanna add textfield in alert you must set "isUseTextField" parameter to true]
+        if isUseTextField {
+            for i in 0..<textFieldLenght {
+                /// [If you wanna add textfields in alert you must use "textFieldLenght" parameter]
+                if let textFieldsPlaceholder {
+                    addTextFieldFromAlert(alertController: alertController,
+                        placeHolder: textFieldsPlaceholder[i],
+                        keyBoardType: textFieldKeyBoardType)
+                }
             }
         }
 
-        let cancelButton = UIAlertAction(title: "Cancel",
-            style: .destructive)
-
-        alertController.addAction(addButton)
-        alertController.addAction(cancelButton)
-
-        addTextFieldFromAlert(alertController: alertController,
-            placeHolder: "Please enter car name.")
-        addTextFieldFromAlert(alertController: alertController,
-            placeHolder: "Please enter car's model.")
-        addTextFieldFromAlert(alertController: alertController,
-            placeHolder: "Please enter car's price.",
-            keyBoardType: UIKeyboardType.decimalPad)
-
         present(alertController, animated: true)
-
-
     }
 
-    // TextField is added by this method in alertController
-    func addTextFieldFromAlert(alertController: UIAlertController,
-        placeHolder: String, keyBoardType: UIKeyboardType? = nil) {
-        alertController.addTextField { (textField) -> Void in
+    /// [Error Alert is created by this method.]
+    func presentErrorAlert() {
+        presentAlert(title: stringConstants.errorAlertTitle,
+            message: stringConstants.errorAlertMessage,
+            cancelButtonTitle: stringConstants.okButton)
+    }
+
+    /// [TextField is added by this method in alertController]
+    func addTextFieldFromAlert(
+        alertController: UIAlertController,
+        placeHolder: String,
+        keyBoardType: UIKeyboardType? = nil
+    ) {
+        alertController.addTextField {
+            (textField) -> Void in
             textField.attributedPlaceholder = NSAttributedString(
                 string: placeHolder,
                 attributes: [NSAttributedString.Key.foregroundColor: UIColor.black.withAlphaComponent(0.5)]
             )
-            // You can change keyboardType dynamically.
+            /// [You can change keyboardType dynamically.]
             if let keyBoardType {
                 textField.keyboardType = keyBoardType
             }
