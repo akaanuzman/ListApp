@@ -19,7 +19,7 @@ class StringContants {
         "Please enter car's model.",
         "Please enter car's price."
     ]
-    let nameFieldPlaceholder = "Please enter car's name."
-    let modelFieldPlaceholder = "Please enter car's model."
-    let priceFieldPlaceholder = "Please enter car's price."
+    let deleteAlertTitle = "Delete all cars from list"
+    let deleteAlertMessage = "The all cars will be deleted from list. \n Are you sure to continue?"
+    let deleteEmptyAlertMessage = "Your car list is empty! \n Please, add car in your list."
 }

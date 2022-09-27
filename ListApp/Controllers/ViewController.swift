@@ -6,6 +6,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     private let stringConstants = StringContants.instance
     private var alertController = UIAlertController()
     @IBOutlet weak var tableView: UITableView!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.dataSource = self
@@ -17,17 +18,26 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "defaultCell",
-            for: indexPath)
-        cell.textLabel?.text = "\(cars[indexPath.row].name) \(cars[indexPath.row].model)"
+        let defaultCell = "defaultCell"
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: defaultCell,
+            for: indexPath
+        )
+        cell.textLabel?.text = CarModel.getNameAndModel(carModel: cars[indexPath.row])
         return cell
     }
 
-    @IBAction func addCar(_ sender: Any) {
+    @IBAction private func addCar(_ sender: Any) {
         presentAddAlert()
     }
 
-    func presentAddAlert() {
+    @IBAction private func deleteAllCar(_ sender: Any) {
+        presentDeleteAllAlert()
+    }
+
+
+    /// [A new car is added by this method in car list]
+    private func presentAddAlert() {
         presentAlert(title: stringConstants.addCarAlertTitle,
             message: nil,
             cancelButtonTitle: stringConstants.cancelButton,
@@ -38,8 +48,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 let modelText = self.alertController.textFields?[1].text!
                 let priceText = self.alertController.textFields?.last?.text!
                 if nameText != "" && modelText != "" && priceText != "" {
-                    self.cars.append(CarModel(name: nameText!,
-                        model: modelText!, price: Double(priceText!) ?? Double(0)))
+                    self.cars.append(
+                        CarModel(
+                            name: nameText!,
+                            model: modelText!,
+                            price: Double(priceText!) ?? Double(0)
+                        )
+                    )
                     self.tableView.reloadData()
                 } else {
                     self.presentErrorAlert()
@@ -51,8 +66,31 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         )
     }
 
+    /// [The all cars are deleted from list.]
+    private func presentDeleteAllAlert() {
+        if cars.isEmpty {
+            presentAlert(
+                title: stringConstants.errorAlertTitle,
+                message: stringConstants.deleteEmptyAlertMessage,
+                cancelButtonTitle: stringConstants.okButton
+            )
+        } else {
+            presentAlert(
+                title: stringConstants.deleteAlertTitle,
+                message: stringConstants.deleteAlertMessage,
+                cancelButtonTitle: stringConstants.cancelButton,
+                defaultButtonTitle: stringConstants.okButton,
+                defaultButtonHandler: {
+                    _ in
+                    self.cars.removeAll()
+                    self.tableView.reloadData()
+                }
+            )
+        }
+    }
+
     /// [Alert is created by this method optionally.]
-    func presentAlert(
+    private func presentAlert(
         title: String?,
         message: String?,
         alertStyle: UIAlertController.Style = .alert,
@@ -65,20 +103,26 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         textFieldKeyBoardType: UIKeyboardType? = nil
     ) {
         /// [Alert is created.]
-        alertController = UIAlertController(title: title,
+        alertController = UIAlertController(
+            title: title,
             message: message,
-            preferredStyle: alertStyle)
+            preferredStyle: alertStyle
+        )
 
         /// [Cancel button action is created in alertController.]
-        let cancelButton = UIAlertAction(title: cancelButtonTitle,
-            style: .destructive)
+        let cancelButton = UIAlertAction(
+            title: cancelButtonTitle,
+            style: .destructive
+        )
         alertController.addAction(cancelButton)
 
         /// [Default button action is created by optional in alertController.]
         if let defaultButtonTitle {
-            let defaultButton = UIAlertAction(title: defaultButtonTitle,
+            let defaultButton = UIAlertAction(
+                title: defaultButtonTitle,
                 style: .default,
-                handler: defaultButtonHandler)
+                handler: defaultButtonHandler
+            )
             alertController.addAction(defaultButton)
         }
 
@@ -87,9 +131,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             for i in 0..<textFieldLenght {
                 /// [If you wanna add textfields in alert you must use "textFieldLenght" parameter]
                 if let textFieldsPlaceholder {
-                    addTextFieldFromAlert(alertController: alertController,
+                    addTextFieldFromAlert(
+                        alertController: alertController,
                         placeHolder: textFieldsPlaceholder[i],
-                        keyBoardType: textFieldKeyBoardType)
+                        keyBoardType: textFieldKeyBoardType
+                    )
                 }
             }
         }
@@ -98,14 +144,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
 
     /// [Error Alert is created by this method.]
-    func presentErrorAlert() {
+    private func presentErrorAlert() {
         presentAlert(title: stringConstants.errorAlertTitle,
             message: stringConstants.errorAlertMessage,
             cancelButtonTitle: stringConstants.okButton)
     }
 
     /// [TextField is added by this method in alertController]
-    func addTextFieldFromAlert(
+    private func addTextFieldFromAlert(
         alertController: UIAlertController,
         placeHolder: String,
         keyBoardType: UIKeyboardType? = nil
