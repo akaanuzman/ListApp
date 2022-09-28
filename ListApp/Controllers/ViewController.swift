@@ -199,6 +199,20 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
                     let nameText = self.alertController.textFields?.first?.text!
                     let modelText = self.alertController.textFields?[1].text!
                     let priceText = self.alertController.textFields?.last?.text!
+                    if nameText != "" || modelText != "" || priceText != "" {
+                        if nameText != "" {
+                            self.cars[indexPath.row].name = nameText!
+                        }
+                        if modelText != "" {
+                            self.cars[indexPath.row].model = modelText!
+                        }
+                        if priceText != "" {
+                            self.cars[indexPath.row].price = Double(priceText!) ?? Double(0)
+                        }
+                        tableView.reloadData()
+                    } else {
+                        self.presentErrorAlert()
+                    }
 
                 },
                 isUseTextField: true,
@@ -206,7 +220,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
                 textFieldsPlaceholder: self.stringConstants.fieldsPlaceHolder
             )
         }
-        
+
         editAction.backgroundColor = .systemOrange
 
         let config = UISwipeActionsConfiguration(actions: [deleteAction, editAction])
