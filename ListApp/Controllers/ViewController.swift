@@ -1,6 +1,6 @@
 import UIKit
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ViewController: UIViewController {
 
     private var cars = CarModel.cars
     private let stringConstants = StringContants.instance
@@ -13,20 +13,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         tableView.delegate = self
     }
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return cars.count
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let defaultCell = "defaultCell"
-        let cell = tableView.dequeueReusableCell(
-            withIdentifier: defaultCell,
-            for: indexPath
-        )
-        cell.textLabel?.text = CarModel.getNameAndModel(carModel: cars[indexPath.row])
-        return cell
-    }
-
     @IBAction private func addCar(_ sender: Any) {
         presentAddAlert()
     }
@@ -35,10 +21,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         presentDeleteAllAlert()
     }
 
-
     /// [A new car is added by this method in car list]
     private func presentAddAlert() {
-        presentAlert(title: stringConstants.addCarAlertTitle,
+        presentAlert(
+            title: stringConstants.addCarAlertTitle,
             message: nil,
             cancelButtonTitle: stringConstants.cancelButton,
             defaultButtonTitle: stringConstants.addButton,
@@ -169,5 +155,62 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
 
+}
+
+extension ViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return cars.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let defaultCell = "defaultCell"
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: defaultCell,
+            for: indexPath
+        )
+        cell.textLabel?.text = CarModel.getNameAndModel(carModel: cars[indexPath.row])
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView,
+        trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+
+        let deleteAction = UIContextualAction(style: .normal, title: "Delete")
+        { _, _, _ in
+            self.presentAlert(
+                title: "Delete Car",
+                message: "The car will be deleted from list. \n Are you sure to continue?",
+                cancelButtonTitle: self.stringConstants.cancelButton,
+                defaultButtonTitle: self.stringConstants.okButton) { _ in
+                self.cars.remove(at: indexPath.row)
+                tableView.reloadData()
+            }
+        }
+        deleteAction.backgroundColor = .systemRed
+
+        let editAction = UIContextualAction(style: .normal, title: "Edit") { _, _, _ in
+            self.presentAlert(
+                title: "Edit Car",
+                message: nil,
+                cancelButtonTitle: self.stringConstants.cancelButton,
+                defaultButtonTitle: self.stringConstants.okButton,
+                defaultButtonHandler: {
+                    _ in
+                    let nameText = self.alertController.textFields?.first?.text!
+                    let modelText = self.alertController.textFields?[1].text!
+                    let priceText = self.alertController.textFields?.last?.text!
+
+                },
+                isUseTextField: true,
+                textFieldLenght: self.stringConstants.fieldsPlaceHolder.count,
+                textFieldsPlaceholder: self.stringConstants.fieldsPlaceHolder
+            )
+        }
+        
+        editAction.backgroundColor = .systemOrange
+
+        let config = UISwipeActionsConfiguration(actions: [deleteAction, editAction])
+        return config
+    }
 }
 
