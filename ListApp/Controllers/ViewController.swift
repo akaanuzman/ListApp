@@ -1,16 +1,19 @@
 import UIKit
+import CoreData
+
 
 class ViewController: UIViewController {
-
-    private var cars = CarModel.cars
+    private var items: [CarModelItem] = []
     private let stringConstants = StringContants.instance
     private var alertController = UIAlertController()
     @IBOutlet weak var tableView: UITableView!
+    let appDelegate = UIApplication.shared.delegate as? AppDelegate
 
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.dataSource = self
         tableView.delegate = self
+        fetch()
     }
 
     @IBAction private func addCar(_ sender: Any) {
@@ -30,21 +33,7 @@ class ViewController: UIViewController {
             defaultButtonTitle: stringConstants.addButton,
             defaultButtonHandler: {
                 _ in
-                let nameText = self.alertController.textFields?.first?.text!
-                let modelText = self.alertController.textFields?[1].text!
-                let priceText = self.alertController.textFields?.last?.text!
-                if nameText != "" && modelText != "" && priceText != "" {
-                    self.cars.append(
-                        CarModel(
-                            name: nameText!,
-                            model: modelText!,
-                            price: Double(priceText!) ?? Double(0)
-                        )
-                    )
-                    self.tableView.reloadData()
-                } else {
-                    self.presentErrorAlert()
-                }
+                self.addCar()
             },
             isUseTextField: true,
             textFieldLenght: stringConstants.fieldsPlaceHolder.count,
@@ -52,9 +41,43 @@ class ViewController: UIViewController {
         )
     }
 
+    /// [If you wanna add a car in list, you must use this method.]
+    func addCar() {
+        let nameText = alertController.textFields?.first?.text!
+        let modelText = alertController.textFields?[1].text!
+        let priceText = alertController.textFields?.last?.text!
+        if nameText != "" && modelText != "" && priceText != "" {
+            let entityName = "CarItem"
+            let managedObjectContext = appDelegate?.persistentContainer.viewContext
+            let entity = NSEntityDescription.entity(
+                forEntityName: entityName,
+                in: managedObjectContext!
+            )
+            let carItem = CarModelItem(
+                entity: entity!,
+                insertInto: managedObjectContext
+            )
+            carItem.setValue(UUID(), forKey: "id")
+            carItem.setValue(nameText, forKey: "name")
+            carItem.setValue(modelText, forKey: "model")
+            carItem.setValue(Double(priceText!), forKey: "price")
+            onDatabaseSave(db: managedObjectContext)
+        } else {
+            presentErrorAlert()
+        }
+
+    }
+
+    /// [Error Alert is created by this method for add a car in list.]
+    private func presentErrorAlert() {
+        presentAlert(title: stringConstants.errorAlertTitle,
+            message: stringConstants.errorAlertMessage,
+            cancelButtonTitle: stringConstants.okButton)
+    }
+
     /// [The all cars are deleted from list.]
     private func presentDeleteAllAlert() {
-        if cars.isEmpty {
+        if items.isEmpty {
             presentAlert(
                 title: stringConstants.errorAlertTitle,
                 message: stringConstants.deleteEmptyAlertMessage,
@@ -68,8 +91,11 @@ class ViewController: UIViewController {
                 defaultButtonTitle: stringConstants.okButton,
                 defaultButtonHandler: {
                     _ in
-                    self.cars.removeAll()
-                    self.tableView.reloadData()
+                    let managedObjectContext = self.appDelegate?.persistentContainer.viewContext
+                    for item in self.items {
+                        managedObjectContext?.delete(item)
+                    }
+                    self.onDatabaseSave(db: managedObjectContext)
                 }
             )
         }
@@ -129,12 +155,7 @@ class ViewController: UIViewController {
         present(alertController, animated: true)
     }
 
-    /// [Error Alert is created by this method.]
-    private func presentErrorAlert() {
-        presentAlert(title: stringConstants.errorAlertTitle,
-            message: stringConstants.errorAlertMessage,
-            cancelButtonTitle: stringConstants.okButton)
-    }
+
 
     /// [TextField is added by this method in alertController]
     private func addTextFieldFromAlert(
@@ -155,11 +176,33 @@ class ViewController: UIViewController {
         }
     }
 
+    private func onDatabaseSave(db: NSManagedObjectContext?) {
+        do {
+            try db?.save()
+            self.fetch()
+        } catch {
+            let nsError = error as NSError
+            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+        }
+    }
+
+    private func fetch() {
+        let managedObjectContext = self.appDelegate?.persistentContainer.viewContext
+        let fetchRequest = CarModelItem.fetchRequest()
+        do {
+            items = try managedObjectContext!.fetch(fetchRequest)
+            tableView.reloadData()
+        } catch {
+            let nsError = error as NSError
+            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+        }
+    }
+
 }
 
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return cars.count
+        return items.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -168,9 +211,10 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
             withIdentifier: defaultCell,
             for: indexPath
         )
-        cell.textLabel?.text = CarModel.getNameAndModel(carModel: cars[indexPath.row])
+        cell.textLabel?.text = "\(items[indexPath.row].name ?? "NULL_NAME") \(items[indexPath.row].model ?? "NULL_MODEL")"
         return cell
     }
+
 
     func tableView(_ tableView: UITableView,
         trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
@@ -182,7 +226,8 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
                 message: "The car will be deleted from list. \n Are you sure to continue?",
                 cancelButtonTitle: self.stringConstants.cancelButton,
                 defaultButtonTitle: self.stringConstants.okButton) { _ in
-                self.cars.remove(at: indexPath.row)
+                let managedObjectContext = self.appDelegate?.persistentContainer.viewContext
+                managedObjectContext?.delete(self.items[indexPath.row])
                 tableView.reloadData()
             }
         }
@@ -201,13 +246,13 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
                     let priceText = self.alertController.textFields?.last?.text!
                     if nameText != "" || modelText != "" || priceText != "" {
                         if nameText != "" {
-                            self.cars[indexPath.row].name = nameText!
+//                            self.cars[indexPath.row].name = nameText!
                         }
                         if modelText != "" {
-                            self.cars[indexPath.row].model = modelText!
+//                            self.cars[indexPath.row].model = modelText!
                         }
                         if priceText != "" {
-                            self.cars[indexPath.row].price = Double(priceText!) ?? Double(0)
+//                            self.cars[indexPath.row].price = Double(priceText!) ?? Double(0)
                         }
                         tableView.reloadData()
                     } else {
