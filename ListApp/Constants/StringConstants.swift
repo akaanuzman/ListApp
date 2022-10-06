@@ -19,7 +19,12 @@ class StringContants {
         "Please enter car's model.",
         "Please enter car's price."
     ]
-    let deleteAlertTitle = "Delete all cars from list"
-    let deleteAlertMessage = "The all cars will be deleted from list. \n Are you sure to continue?"
+    let deleteAllAlertTitle = "Delete all cars from list"
+    let deleteAllAlertMessage = "The all cars will be deleted from list. \n Are you sure to continue?"
     let deleteEmptyAlertMessage = "Your car list is empty! \n Please, add car in your list."
+    let delete = "Delete"
+    let deleteAlertTitle = "Delete Car"
+    let deleteAlertMessage = "The car will be deleted from list. \n Are you sure to continue?"
+    let edit = "Edit"
+    let editAlertTitle = "Edit Car"
 }
